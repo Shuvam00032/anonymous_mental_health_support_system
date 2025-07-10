@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Mental Health Support</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/dark-theme.css" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <style>
+        body {
+            background: #f5f6fa;
+        }
+        .chatbot-card {
+            max-width: 700px;
+            margin: 40px auto;
+            border-radius: 18px;
+            box-shadow: 0 2px 16px rgba(0,0,0,0.07);
+            padding: 0;
+        }
+        .chatbot-header {
+            border-radius: 18px 18px 0 0;
+            background: linear-gradient(135deg, #25364a 0%, #3b4c61 100%);
+            color: #fff;
+            padding: 32px 24px 18px 24px;
+            text-align: center;
+        }
+        .chatbot-header img {
+            width: 56px;
+            height: 56px;
+            object-fit: contain;
+            margin-bottom: 10px;
+        }
+        .chatbot-header h2 {
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .chatbot-header p {
+            margin-bottom: 0;
+            font-size: 1.1rem;
+            opacity: 0.95;
+        }
+        .chatbot-chat-area {
+            background: #fff;
+            border-radius: 0 0 18px 18px;
+            padding: 24px 24px 0 24px;
+            min-height: 400px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .chatbot-message {
+            display: flex;
+            margin-bottom: 18px;
+        }
+        .chatbot-message.user {
+            justify-content: flex-end;
+        }
+        .chatbot-bubble {
+            max-width: 70%;
+            padding: 14px 18px;
+            border-radius: 16px;
+            font-size: 1.08rem;
+            word-break: break-word;
+        }
+        .chatbot-message.user .chatbot-bubble {
+            background: #2196f3;
+            color: #fff;
+            border-bottom-right-radius: 4px;
+            border-bottom-left-radius: 16px;
+            border-top-left-radius: 16px;
+            border-top-right-radius: 16px;
+            margin-right: 8px;
+        }
+        .chatbot-message.bot .chatbot-bubble {
+            background: #fff;
+            color: #000000;
+            border: 2px solid #25364a;
+            border-bottom-left-radius: 4px;
+            border-bottom-right-radius: 16px;
+            border-top-right-radius: 16px;
+            border-top-left-radius: 16px;
+            margin-left: 8px;
+            position: relative;
+        }
+        .chatbot-message.bot .chatbot-bubble .bot-message-text {
+            color: #000 !important;
+        }
+        .chatbot-message.bot .chatbot-bubble .bot-message-text * {
+            color: #000 !important;
+        }
+        .chatbot-message.bot .chatbot-bubble .bi {
+            color: #000000;
+            margin-right: 6px;
+            font-size: 1.1em;
+            vertical-align: -2px;
+        }
+        .chatbot-input-area {
+            background: #fff;
+            border-radius: 0 0 18px 18px;
+            box-shadow: 0 -2px 8px rgba(0,0,0,0.04);
+            padding: 18px 24px 18px 24px;
+        }
+        .chatbot-input-row {
+            display: flex;
+            align-items: center;
+        }
+        .chatbot-input-row input {
+            flex: 1;
+            border-radius: 10px;
+            border: 2px solid #2196f3;
+            padding: 10px 14px;
+            font-size: 1.08rem;
+            margin-right: 10px;
+        }
+        .chatbot-input-row button {
+            border-radius: 8px;
+            font-size: 1.1rem;
+            padding: 8px 22px;
+        }
+        @media (max-width: 600px) {
+            .chatbot-card, .chatbot-header, .chatbot-chat-area, .chatbot-input-area {
+                border-radius: 0 !important;
+                padding-left: 8px !important;
+                padding-right: 8px !important;
+            }
+        }
+        /* More specific rule to ensure bot message text is black */
+        .glass-card .chatbot-chat-area .chatbot-message.bot .chatbot-bubble, 
+        .glass-card .chatbot-chat-area .chatbot-message.bot .chatbot-bubble .bot-message-text,
+        .glass-card .chatbot-chat-area .chatbot-message.bot .chatbot-bubble .bot-message-text * {
+            color: #000 !important;
+        }
+    </style>
+</head>
+<body class="dark-bg">
+    <div class="animated-lines-bg" style="position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:0;pointer-events:none;">
+        <svg width="100%" height="100%" viewBox="0 0 1200 800" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path id="wave1" d="M0 400 Q300 200 600 400 T1200 400" stroke="#ff3c6a" stroke-width="6" fill="none"/>
+            <path id="wave2" d="M0 500 Q300 700 600 500 T1200 500" stroke="#36cfff" stroke-width="6" fill="none"/>
+            <path id="wave3" d="M0 300 Q300 100 600 300 T1200 300" stroke="#ffb347" stroke-width="4" fill="none"/>
+            <path id="wave4" d="M0 600 Q300 800 600 600 T1200 600" stroke="#46ffb3" stroke-width="4" fill="none"/>
+            <animate xlink:href="#wave1" attributeName="d" values="M0 400 Q300 200 600 400 T1200 400;M0 400 Q300 300 600 400 T1200 400;M0 400 Q300 200 600 400 T1200 400" dur="8s" repeatCount="indefinite"/>
+            <animate xlink:href="#wave2" attributeName="d" values="M0 500 Q300 700 600 500 T1200 500;M0 500 Q300 600 600 500 T1200 500;M0 500 Q300 700 600 500 T1200 500" dur="10s" repeatCount="indefinite"/>
+            <animate xlink:href="#wave3" attributeName="d" values="M0 300 Q300 100 600 300 T1200 300;M0 300 Q300 200 600 300 T1200 300;M0 300 Q300 100 600 300 T1200 300" dur="12s" repeatCount="indefinite"/>
+            <animate xlink:href="#wave4" attributeName="d" values="M0 600 Q300 800 600 600 T1200 600;M0 600 Q300 700 600 600 T1200 600;M0 600 Q300 800 600 600 T1200 600" dur="14s" repeatCount="indefinite"/>
+        </svg>
+    </div>
+    <div class="container">
+        <div class="chatbot-card glass-card text-light p-0 mt-5 mb-5">
+            <div class="chatbot-header">
+                <img src="/logo.png" alt="Logo" />
+                <h2><i class="bi bi-robot"></i> AI Mental Health Support</h2>
+                <p>Talk to our AI assistant about anything that's on your mind.<br>We're here to listen and support you.</p>
+            </div>
+            <div class="chatbot-chat-area" id="chatbot-chat-area"></div>
+            <div class="chatbot-input-area">
+                <form id="chatbot-form" autocomplete="off">
+                    <div class="chatbot-input-row">
+                        <input type="text" id="chatbot-message-input" class="form-control dark-input" placeholder="Type your message here..." autocomplete="off">
+                        <button type="submit" class="btn btn-gradient-glow"><i class="bi bi-send"></i> Send</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script>
+        const chatArea = document.getElementById('chatbot-chat-area');
+        const chatForm = document.getElementById('chatbot-form');
+        const messageInput = document.getElementById('chatbot-message-input');
+
+        function appendMessage(content, sender) {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = 'chatbot-message ' + sender;
+            let bubble = document.createElement('div');
+            bubble.className = 'chatbot-bubble';
+            if (sender === 'bot') {
+                bubble.innerHTML = '<i class="bi bi-robot"></i> <span class="bot-message-text">' + content + '</span>';
+            } else {
+                bubble.textContent = content;
+            }
+            msgDiv.appendChild(bubble);
+            chatArea.appendChild(msgDiv);
+            chatArea.scrollTop = chatArea.scrollHeight;
+        }
+
+        chatForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const message = messageInput.value.trim();
+            if (!message) return;
+            appendMessage(message, 'user');
+            messageInput.value = '';
+            try {
+                const response = await fetch('/api/chatbot/message', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    appendMessage(data.response, 'bot');
+                } else {
+                    appendMessage('Sorry, I could not process your message.', 'bot');
+                }
+            } catch (error) {
+                appendMessage('Sorry, there was an error connecting to the server.', 'bot');
+            }
+        });
+    </script>
+</body>
+</html> 

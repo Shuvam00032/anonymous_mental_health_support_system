@@ -1,0 +1,194 @@
+body {
+    background: #101014;
+    color: #fff;
+    font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+    min-height: 100vh;
+    margin: 0;
+    position: relative;
+}
+
+/* Glowing flowing lines background (static SVG) */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    z-index: 0;
+    background: url('data:image/svg+xml;utf8,<svg width="100%25" height="100%25" viewBox="0 0 1200 800" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M0 400 Q300 200 600 400 T1200 400" stroke="%23ff3c6a" stroke-width="6" fill="none"/><path d="M0 500 Q300 700 600 500 T1200 500" stroke="%2336cfff" stroke-width="6" fill="none"/><path d="M0 300 Q300 100 600 300 T1200 300" stroke="%23ffb347" stroke-width="4" fill="none"/><path d="M0 600 Q300 800 600 600 T1200 600" stroke="%2346ffb3" stroke-width="4" fill="none"/></svg>') no-repeat center center fixed;
+    background-size: cover;
+    opacity: 0.18;
+    pointer-events: none;
+}
+
+.card, .dashboard-card, .appointments-card, .profile-card, .chat-card {
+    background: rgba(20, 20, 28, 0.98) !important;
+    border-radius: 24px !important;
+    box-shadow: 0 4px 32px 0 rgba(0,0,0,0.25);
+    border: none;
+    z-index: 1;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: #fff;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+}
+
+a, .btn-link {
+    color: #36cfff;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+a:hover, .btn-link:hover {
+    color: #ff3c6a;
+}
+
+.btn, .btn-primary {
+    background: linear-gradient(90deg, #36cfff 0%, #ff3c6a 100%);
+    color: #fff;
+    border: none;
+    border-radius: 32px;
+    font-weight: 600;
+    box-shadow: 0 2px 8px 0 rgba(54,207,255,0.15);
+    transition: background 0.2s, box-shadow 0.2s;
+}
+.btn:hover, .btn-primary:hover {
+    background: linear-gradient(90deg, #ff3c6a 0%, #36cfff 100%);
+    color: #fff;
+    box-shadow: 0 4px 16px 0 rgba(255,60,106,0.18);
+}
+
+input, textarea, select {
+    background: #181824 !important;
+    color: #fff !important;
+    border: 1.5px solid #232336 !important;
+    border-radius: 12px !important;
+    box-shadow: none !important;
+}
+input:focus, textarea:focus, select:focus {
+    border-color: #36cfff !important;
+    outline: none !important;
+}
+
+.navbar, .dashboard-header, .appointments-header, .profile-header, .chat-header {
+    background: linear-gradient(135deg, #181824 0%, #232336 100%) !important;
+    color: #fff !important;
+    border-radius: 24px 24px 0 0 !important;
+    box-shadow: 0 2px 16px 0 rgba(54,207,255,0.08);
+}
+
+.table {
+    background: transparent !important;
+    color: #fff;
+}
+.table th, .table td {
+    background: transparent !important;
+    color: #fff !important;
+    border-color: #232336 !important;
+}
+
+::-webkit-scrollbar {
+    width: 8px;
+    background: #181824;
+}
+::-webkit-scrollbar-thumb {
+    background: #232336;
+    border-radius: 8px;
+}
+
+.alert-success {
+    background: #1e2e1e;
+    color: #aaffaa;
+    border: 1px solid #36cfff;
+}
+.alert-danger {
+    background: #2e1e1e;
+    color: #ffaaaa;
+    border: 1px solid #ff3c6a;
+}
+
+/* Dark background for body */
+.dark-bg {
+    background: #181c24 !important;
+    min-height: 100vh;
+}
+
+/* Glassy card effect */
+.glass-card {
+    background: rgba(24, 28, 36, 0.85) !important;
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.18);
+    backdrop-filter: blur(12px);
+    border-radius: 22px;
+    border: 1.5px solid rgba(255,255,255,0.08);
+}
+
+/* Muted light text */
+.text-muted-light {
+    color: #bfc9d1 !important;
+}
+
+/* Dark input fields */
+.dark-input {
+    background: #232837 !important;
+    color: #fff !important;
+    border: 1.5px solid #31374a !important;
+    border-radius: 12px !important;
+    box-shadow: none !important;
+}
+.dark-input:focus {
+    background: #232837 !important;
+    color: #fff !important;
+    border-color: #36cfff !important;
+    box-shadow: 0 0 0 2px rgba(54,207,255,0.15) !important;
+}
+
+.dark-input-icon {
+    background: #232837 !important;
+    color: #36cfff !important;
+    border: 1.5px solid #31374a !important;
+    border-right: none !important;
+}
+
+/* Gradient glowing button */
+.btn-gradient-glow {
+    background: linear-gradient(90deg, #36cfff 0%, #ff3c6a 100%);
+    color: #fff !important;
+    border: none;
+    border-radius: 22px;
+    font-weight: 600;
+    box-shadow: 0 0 16px 2px rgba(54,207,255,0.25), 0 2px 8px rgba(255,60,106,0.10);
+    transition: box-shadow 0.2s, transform 0.2s;
+}
+.btn-gradient-glow:hover, .btn-gradient-glow:focus {
+    box-shadow: 0 0 32px 6px rgba(54,207,255,0.35), 0 4px 16px rgba(255,60,106,0.18);
+    transform: translateY(-2px) scale(1.03);
+    color: #fff !important;
+}
+
+/* Make sure form-check label is light */
+.form-check-label.text-light {
+    color: #e0e6ed !important;
+}
+
+/* Make all text inside glass-card light by default */
+.glass-card, .glass-card * {
+  color: #e0e6ed !important;
+}
+
+/* Lighter placeholder for dark backgrounds */
+input::placeholder,
+textarea::placeholder {
+  color: #bfc9d1 !important;
+  opacity: 1 !important;
+}
+
+/* Message/reply text override */
+.message-content, .reply, .reply-list, .reply-form textarea {
+  color: #e0e6ed !important;
+}
+
+/* Ensure chatbot bot message text is black */
+.glass-card .chatbot-chat-area .chatbot-message.bot .chatbot-bubble,
+.glass-card .chatbot-chat-area .chatbot-message.bot .chatbot-bubble .bot-message-text,
+.glass-card .chatbot-chat-area .chatbot-message.bot .chatbot-bubble .bot-message-text * {
+    color: #000 !important;
+} 

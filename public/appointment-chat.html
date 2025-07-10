@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Appointment Chat</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/dark-theme.css" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <style>
+        body { background: #f5f6fa; }
+        .chat-card { max-width: 600px; margin: 40px auto; border-radius: 18px; box-shadow: 0 2px 16px rgba(0,0,0,0.07); }
+        .chat-header { background: linear-gradient(135deg, #25364a 0%, #3b4c61 100%); color: #fff; border-radius: 18px 18px 0 0; padding: 24px 24px 12px 24px; text-align: center; }
+        .chat-header h2 { font-weight: 700; margin-bottom: 8px; }
+        .chat-area { background: #fff; border-radius: 0 0 18px 18px; padding: 24px 24px 0 24px; min-height: 350px; max-height: 350px; overflow-y: auto; }
+        .chat-message { display: flex; margin-bottom: 18px; }
+        .chat-message.self { justify-content: flex-end; }
+        .chat-bubble { max-width: 70%; padding: 12px 16px; border-radius: 16px; font-size: 1.08rem; word-break: break-word; }
+        .chat-message.self .chat-bubble { background: #2196f3; color: #fff; border-bottom-right-radius: 4px; border-bottom-left-radius: 16px; border-top-left-radius: 16px; border-top-right-radius: 16px; margin-right: 8px; }
+        .chat-message.other .chat-bubble { background: #fff; color: #000; border: 2px solid #25364a; border-bottom-left-radius: 4px; border-bottom-right-radius: 16px; border-top-right-radius: 16px; border-top-left-radius: 16px; margin-left: 8px; position: relative; }
+        .chat-message.other .chat-bubble .other-message-text {
+            color: #000 !important;
+        }
+        .chat-message.other .chat-bubble .other-message-text b {
+            color: #000 !important;
+        }
+        .chat-message.other .chat-bubble .bi { color: #25364a; margin-right: 6px; font-size: 1.1em; vertical-align: -2px; }
+        .chat-input-area { background: #fff; border-radius: 0 0 18px 18px; box-shadow: 0 -2px 8px rgba(0,0,0,0.04); padding: 18px 24px 18px 24px; }
+        .chat-input-row { display: flex; align-items: center; }
+        .chat-input-row input { flex: 1; border-radius: 10px; border: 2px solid #2196f3; padding: 10px 14px; font-size: 1.08rem; margin-right: 10px; }
+        .chat-input-row button { border-radius: 8px; font-size: 1.1rem; padding: 8px 22px; }
+        #chat-error { color: #c00; text-align: center; margin-top: 10px; }
+    </style>
+</head>
+<body class="dark-bg" style="background:#10131a;">
+    <div class="container min-vh-100 d-flex justify-content-center align-items-center">
+        <div class="glass-card text-light p-4" style="width:100%;max-width:600px;">
+            <div class="text-center mb-4">
+                <i class="bi bi-chat-dots fa-3x text-primary"></i>
+                <h2 class="fw-bold text-white">Appointment Chat</h2>
+                <p class="text-muted-light">Chat is only available during your confirmed appointment time.</p>
+            </div>
+            <div class="chat-area" id="chat-area"></div>
+            <div class="chat-input-area mt-3">
+                <form id="chat-form" autocomplete="off">
+                    <div class="input-group">
+                        <span class="input-group-text dark-input-icon"><i class="bi bi-chat"></i></span>
+                        <input type="text" id="chat-message-input" class="form-control dark-input" placeholder="Type your message here..." autocomplete="off">
+                        <input type="file" id="chat-image-input" accept="image/*" class="form-control dark-input" style="display: none;">
+                        <button type="button" id="upload-image-btn" class="btn btn-secondary ms-2"><i class="bi bi-image"></i></button>
+                        <button type="submit" class="btn btn-gradient-glow ms-2"><i class="bi bi-send"></i> Send</button>
+                    </div>
+                </form>
+                <div id="chat-error"></div>
+            </div>
+        </div>
+    </div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+    // Get appointmentId from query string
+    function getQueryParam(name) {
+        const url = new URL(window.location.href);
+        return url.searchParams.get(name);
+    }
+    const appointmentId = getQueryParam('appointmentId');
+    let userId = null;
+    let userName = '';
+    // Notification support
+    let windowFocused = true;
+    window.onfocus = () => { windowFocused = true; };
+    window.onblur = () => { windowFocused = false; };
+    function notifyUser(msg) {
+        if (windowFocused) return;
+        if (Notification.permission === 'granted') {
+            new Notification('New chat message', { body: msg.full_name + ': ' + msg.message });
+        }
+    }
+    // Request notification permission on load
+    if ('Notification' in window && Notification.permission !== 'granted') {
+        Notification.requestPermission();
+    }
+    // Only allow authenticated users
+    window.onload = async function() {
+        const res = await fetch('/api/auth/status');
+        const data = await res.json();
+        if (!data.authenticated) {
+            window.location.href = '/login.html';
+            return;
+        }
+        userId = data.user.id;
+        userName = data.user.fullName;
+        startChat();
+    };
+    function appendMessage(msg, self) {
+        const chatArea = document.getElementById('chat-area');
+        const msgDiv = document.createElement('div');
+        msgDiv.className = 'chat-message ' + (self ? 'self' : 'other');
+        let bubble = document.createElement('div');
+        bubble.className = 'chat-bubble';
+        if (msg.image_path) {
+            // Display image
+            const imgElement = document.createElement('img');
+            imgElement.src = msg.image_path;
+            imgElement.style.maxWidth = '100%';
+            imgElement.style.height = 'auto';
+            imgElement.style.borderRadius = '8px';
+            bubble.appendChild(imgElement);
+            
+            // Add message text below image if it exists
+            if (msg.message && msg.message.trim() !== '') {
+                const messageText = document.createElement('p');
+                messageText.textContent = msg.message;
+                messageText.style.marginTop = '10px';
+                messageText.style.marginBottom = '0';
+                bubble.appendChild(messageText);
+            }
+        } else if (msg.message) {
+            if (!self) {
+                // Wrap the content in a span with a class
+                bubble.innerHTML = `<i class='bi bi-person-circle'></i> <span class="other-message-text"><b>${msg.full_name || 'Other'}:</b> ${msg.message}</span>`;
+            } else {
+                bubble.textContent = msg.message;
+            }
+        }
+        msgDiv.appendChild(bubble);
+        chatArea.appendChild(msgDiv);
+        chatArea.scrollTop = chatArea.scrollHeight;
+    }
+    function showError(msg) {
+        document.getElementById('chat-error').textContent = msg;
+    }
+    function startChat() {
+        const socket = io();
+        socket.emit('joinAppointmentChat', { appointmentId, userId });
+        socket.on('chatError', (msg) => {
+            showError(msg);
+            document.getElementById('chat-form').style.display = 'none';
+        });
+        socket.on('chatHistory', (messages) => {
+            document.getElementById('chat-area').innerHTML = '';
+            messages.forEach(msg => appendMessage(msg, msg.user_id === userId));
+        });
+        socket.on('appointmentMessage', (msg) => {
+            appendMessage(msg, msg.user_id === userId);
+            notifyUser(msg);
+        });
+        document.getElementById('chat-form').onsubmit = async function(e) {
+            e.preventDefault();
+            const input = document.getElementById('chat-message-input');
+            const message = input.value.trim();
+            
+            // Only send if there is a text message
+            if (!message) {
+                console.log('No text message to send on form submit. Aborting.');
+                return;
+            }
+            
+            // Send text message
+            const appointmentId = getQueryParam('appointmentId'); // Ensure appointmentId is available
+            if (appointmentId && userId) {
+                console.log('Emitting appointmentMessage Socket.IO event with text:', { appointmentId, userId, message });
+                socket.emit('appointmentMessage', { appointmentId, userId, message, image_path: null }); // Ensure image_path is null for text messages
+                input.value = ''; // Clear the text input
+            } else {
+                console.error('AppointmentId or UserId is missing. Cannot send text message.');
+                showError('Error sending message: User or appointment not identified.');
+            }
+        };
+        
+        // Trigger file input click when image icon button is clicked
+        document.getElementById('upload-image-btn').onclick = function() {
+            console.log('Image upload button clicked.');
+            document.getElementById('chat-image-input').click();
+        };
+        
+        // Handle file selection and upload
+        document.getElementById('chat-image-input').onchange = async function(e) { // Made async to await file upload
+            console.log('File selected:', e.target.files[0]);
+            const imageInput = e.target;
+            const imageFile = imageInput.files[0];
+            
+            if (!imageFile) {
+                console.log('No file selected or selection cancelled.');
+                return; // Do nothing if no file was selected
+            }
+
+            let imagePath = null;
+
+            console.log('Image file detected. Starting upload.');
+            // Upload image first
+            const formData = new FormData();
+            formData.append('chatImage', imageFile);
+            console.log('Sending upload request to /api/chat/upload-image');
+            try {
+                const uploadResponse = await fetch('/api/chat/upload-image', {
+                    method: 'POST',
+                    body: formData
+                });
+                const uploadData = await uploadResponse.json();
+                console.log('Upload response:', uploadData);
+                if (uploadData.success) {
+                    imagePath = uploadData.imagePath;
+                    console.log('Image uploaded successfully. Path:', imagePath);
+
+                    // Emit the message with the image path
+                    const appointmentId = getQueryParam('appointmentId'); // Ensure appointmentId is available
+                    const message = ''; // No text message when sending only image on select
+                    
+                    if (appointmentId && userId) {
+                        console.log('Emitting appointmentMessage Socket.IO event with image:', { appointmentId, userId, message, image_path: imagePath });
+                        socket.emit('appointmentMessage', { appointmentId, userId, message, image_path: imagePath });
+                    } else {
+                        console.error('AppointmentId or UserId is missing. Cannot send image message.');
+                        showError('Error sending image: User or appointment not identified.');
+                    }
+
+                } else {
+                    showError('Failed to upload image: ' + uploadData.message);
+                    console.error('Image upload failed:', uploadData.message);
+                }
+            } catch (error) {
+                showError('Error uploading image: ' + error.message);
+                console.error('Error during image upload fetch:', error);
+            } finally {
+                // Clear the file input regardless of success or failure
+                imageInput.value = '';
+            }
+        };
+    }
+    </script>
+</body>
+</html> 

@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Medical Appointment System</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="/css/style.css" rel="stylesheet">
+</head>
+<body class="dark-bg" style="background:#10131a;">
+    <div class="container min-vh-100 d-flex justify-content-center align-items-center">
+        <div class="glass-card text-light p-4" style="width:100%;max-width:520px;">
+            <div class="text-center mb-4">
+                <i class="fas fa-user-plus fa-3x text-primary"></i>
+                <h2 class="fw-bold text-white">Create Account</h2>
+                <p class="text-muted-light">Join our medical community</p>
+            </div>
+            <form id="registerForm" onsubmit="return handleRegister(event)">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="fullName" class="form-label text-light">Full Name</label>
+                        <div class="input-group">
+                            <span class="input-group-text dark-input-icon"><i class="fas fa-user"></i></span>
+                            <input type="text" class="form-control dark-input" id="fullName" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="username" class="form-label text-light">Username</label>
+                        <div class="input-group">
+                            <span class="input-group-text dark-input-icon"><i class="fas fa-at"></i></span>
+                            <input type="text" class="form-control dark-input" id="username" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="email" class="form-label text-light">Email address</label>
+                    <div class="input-group">
+                        <span class="input-group-text dark-input-icon"><i class="fas fa-envelope"></i></span>
+                        <input type="email" class="form-control dark-input" id="email" required>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="password" class="form-label text-light">Password</label>
+                        <div class="input-group">
+                            <span class="input-group-text dark-input-icon"><i class="fas fa-lock"></i></span>
+                            <input type="password" class="form-control dark-input" id="password" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="confirmPassword" class="form-label text-light">Confirm Password</label>
+                        <div class="input-group">
+                            <span class="input-group-text dark-input-icon"><i class="fas fa-lock"></i></span>
+                            <input type="password" class="form-control dark-input" id="confirmPassword" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="userType" class="form-label text-light">Register as</label>
+                    <select class="form-select dark-input" id="userType" required>
+                        <option value="patient">Patient</option>
+                        <option value="doctor">Doctor</option>
+                    </select>
+                </div>
+                <div id="doctorFields" style="display: none;">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="specialization" class="form-label text-light">Specialization</label>
+                            <input type="text" class="form-control dark-input" id="specialization">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="experience" class="form-label text-light">Years of Experience</label>
+                            <input type="number" class="form-control dark-input" id="experience" min="0">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="qualification" class="form-label text-light">Qualification</label>
+                        <input type="text" class="form-control dark-input" id="qualification">
+                    </div>
+                </div>
+                <div class="mb-3 form-check">
+                    <input type="checkbox" class="form-check-input" id="terms" required>
+                    <label class="form-check-label text-light" for="terms">
+                        I agree to the <a href="/terms.html" class="text-decoration-none text-info">Terms of Service</a> and 
+                        <a href="/privacy.html" class="text-decoration-none text-info">Privacy Policy</a>
+                    </label>
+                </div>
+                <button type="submit" class="btn btn-gradient-glow w-100 mb-3">
+                    <i class="fas fa-user-plus me-2"></i>Register
+                </button>
+                <div class="text-center">
+                    <p class="mb-0">
+                        <span class="text-light">Already have an account?</span> 
+                        <a href="/login.html" class="text-decoration-none text-info">Login here</a>
+                    </p>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script src="/js/main.js"></script>
+    <script>
+        // Show/hide doctor fields based on user type
+        document.getElementById('userType').addEventListener('change', function() {
+            const doctorFields = document.getElementById('doctorFields');
+            doctorFields.style.display = this.value === 'doctor' ? 'block' : 'none';
+        });
+        async function handleRegister(event) {
+            event.preventDefault();
+            if (!appUtils.validateForm('registerForm')) {
+                return false;
+            }
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            if (password !== confirmPassword) {
+                appUtils.showAlert('Passwords do not match', 'danger');
+                return false;
+            }
+            const userData = {
+                fullName: document.getElementById('fullName').value,
+                username: document.getElementById('username').value,
+                email: document.getElementById('email').value,
+                password: password,
+                userType: document.getElementById('userType').value
+            };
+            if (userData.userType === 'doctor') {
+                userData.specialization = document.getElementById('specialization').value;
+                userData.experience = document.getElementById('experience').value;
+                userData.qualification = document.getElementById('qualification').value;
+            }
+            try {
+                appUtils.showSpinner();
+                const response = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(userData)
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    appUtils.showAlert('Registration successful! Redirecting to login...');
+                    setTimeout(() => {
+                        window.location.href = '/login.html';
+                    }, 1500);
+                } else {
+                    appUtils.showAlert(data.message || 'Registration failed', 'danger');
+                }
+            } catch (error) {
+                appUtils.handleApiError(error);
+            } finally {
+                appUtils.hideSpinner();
+            }
+            return false;
+        }
+    </script>
+</body>
+</html> 
