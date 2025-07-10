@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Medical Appointment System
 
 A professional web-based platform for booking medical appointments, managing doctor-patient interactions, and providing instant AI-powered health advice.
@@ -111,3 +112,6 @@ MIT (or specify your license)
 ---
 
 _This project is for educational and demonstration purposes. Not for production medical use._ 
+=======
+# anonymous_mental_health_support_system
+>>>>>>> 39fbf8ffd99abafe315f17bfce6383e470d7a921
